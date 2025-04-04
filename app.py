@@ -12,7 +12,7 @@ import backend # Assuming 'backend.py' exists in the same directory
 import streamlit.components.v1 as components
 from st_copy_to_clipboard import st_copy_to_clipboard
 
-GUI_DEBUG = 1 # Set to 0 to use actual backend functions
+GUI_DEBUG = 0 # Set to 0 to use actual backend functions
 
 # ---------- PAGE CONFIG ----------
 st.set_page_config(page_title="HH Selbobot", layout="wide")
