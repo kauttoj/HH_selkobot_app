@@ -58,11 +58,11 @@ st.markdown('<div class="title-font">HH Selbobot</div>', unsafe_allow_html=True)
 st.markdown("""
 <div style='font-size: 0.85em; line-height: 1.4; padding: 10px 15px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 6px;'>
 <b>📘 Usage Instructions</b><br><br>
-<b>1. Input text:</b> Insert raw or parsed text by writing, copy-pasting, or reading from a file.<br>
-<b>2. Parse raw text:</b> If not parsing yourself, use automatic parsing. Manually fix any mistakes.<br>
-<b>3. Set parameters:</b> Try different <i>models</i>, <i>prompts</i>, and <i>agent types</i>. Keep temperature close to <b>0.40</b>.<br>
-<b>4. Simplify:</b> Simplify parsed text. This takes <b>5–30 seconds</b> (depending on backend). You can generate and view multiple versions.<br><br>
-<b>Agents:</b> Muuntaja = writer only, Muuntaja & faktantarkastaja = writer followed by fact correction.<br>
+<b>1. Input text:</b> Insert raw or parsed text by writing, copy-pasting, or reading from a file. Raw text must be parsed.<br>
+<b>2. Parse raw text:</b> If not parsing yourself, try automatic LLM parsing (not perfect). Manually fix any mistakes.<br>
+<b>3. Set parameters:</b> Try different <i>models</i>, <i>prompts</i>, and <i>agent types</i>. Temperature close to <b>0.40</b> is recommended.<br>
+<b>4. Simplify:</b> Simplify the parsed text. This takes <b>5–30 seconds</b>, depending on LLM service. You can generate and view multiple versions of the same text.<br><br>
+<b>Agents:</b> kirjoittaja = writer only, kirjoittaja & faktantarkastaja = writer followed by fact correction step.<br>
 <b>80% pituusprompti:</b> Include prompt instruction to aim for ~80% of original text length.<br><br>
 <span style='color: #555;'>💡 "Clean view" shows cleaned HTML rendered output without parsing tags.</span>
 </div>
@@ -124,7 +124,7 @@ defaults = {
     "parse_result": None,
     "simplify_result": None,
     "model": backend.WRITER_models[0] if hasattr(backend, 'WRITER_models') and backend.WRITER_models else None,
-    "agent_type": "Muuntaja",
+    "agent_type": "kirjoittaja",
     "prompt_type": list(backend.PROMPT_writer.keys())[0] if hasattr(backend, 'PROMPT_writer') and backend.PROMPT_writer else None,
     #"temperature": 0.40,
 }
@@ -146,7 +146,7 @@ def parse_text_thread(raw_text_arg: str,result_queue):
             parsed_result = f"<title>{raw_text_arg}</title>"
             clean = backend.tagged_text_to_noncolored_html(parsed_result)
         else:
-            print('Running actual backend parsing...');
+            print('Running LLM parsing...');
             parsed_result = backend.parse_text(raw_text, st.session_state);
             clean = backend.tagged_text_to_noncolored_html(parsed_result)
             print('Backend parsing complete.')
@@ -166,7 +166,7 @@ def simplify_text_thread(parsed_text_arg: str, settings: dict,result_queue):
             clean = backend.tagged_text_to_noncolored_html(raw)
             print('Dummy simplification complete.')
         else:
-            print('Running actual backend simplification...');
+            print('Running LLM simplification...');
             raw = backend.simplify_text(parsed_text_in, settings)
             clean = backend.tagged_text_to_noncolored_html(raw)
             if not raw:
@@ -325,7 +325,7 @@ with st.sidebar:
 
     model_list = backend.WRITER_models if hasattr(backend, 'WRITER_models') else []
     model_index = model_list.index(st.session_state.model) if st.session_state.model in model_list else 0
-    agent_list = ["Muuntaja", "Muuntaja & faktantarkastaja"]
+    agent_list = ["kirjoittaja", "kirjoittaja & faktantarkastaja"]
     agent_index = agent_list.index(st.session_state.agent_type) if st.session_state.agent_type in agent_list else 0
     prompt_list = list(backend.PROMPT_writer.keys()) if hasattr(backend, 'PROMPT_writer') else []
     prompt_index = prompt_list.index(st.session_state.prompt_type) if st.session_state.prompt_type in prompt_list else 0
@@ -347,8 +347,8 @@ col_input, col_output = st.columns(2)
 # --- View Toggle Buttons ---
 def activate_input_text(): st.session_state.active_text = 'RAW'
 def activate_parsed_text(): st.session_state.active_text = 'PARSED'
-col1, col2,_ = st.columns([1,1,2])
-
+#col1, col2,_ = st.columns([1,1,2])
+col1,col2,dummy1,col_simplify,dummy2,col_copypaste,dummy3 = st.columns([2,2,0.5,2,0.5,0.75,0.25])
 # Fixed: View toggles are NOT disabled during computation
 toggle_disabled = False # Keep enabled
 
@@ -359,9 +359,57 @@ with col2: # Parsed view button
     with stylable_container( "toggle_btn2", css_styles=f""" button {{ background-color: {"#e57373" if st.session_state.active_text == 'PARSED' else "lightgray"} !important; border: 1px solid black !important; color: black !important; }} """ ):
         st.button("Show Parsed", on_click=activate_parsed_text, use_container_width=True, disabled=toggle_disabled)
 
+with col_simplify:
+    simplify_disabled = ( st.session_state.status != "Ready" or not st.session_state.parsed_available )
+    if st.button("🧠 Simplify Text", disabled=simplify_disabled, use_container_width=True):
+        if st.session_state.compute_thread is None:
+            if len(st.session_state.parsed_text) < 10:
+                st.error(f'⚠️ Parsed text too short {len(st.session_state.parsed_text)}, nothing to simplify')
+            elif not (('<title>' in st.session_state.parsed_text) and ('</title>' in st.session_state.parsed_text)):
+                st.error(f'⚠️ Input text does not appear to be parsed. Parse it first with proper tags.')
+            else:
+                print("Starting simplification thread...")
+                st.session_state.status = "simplifying";
+                st.session_state.additional_status_text='calling LLM...'
+                st.session_state.simplify_result = None
+                current_settings = {"model": st.session_state.model, "agent_type": st.session_state.agent_type, "prompt_type": st.session_state.prompt_type, "temperature": st.session_state.temperature, "tokencount": st.session_state.tokencount };
+                thread_args = (st.session_state.parsed_text, current_settings,st.session_state.result_queue)
+                #thread = threading.Thread(target=simplify_text_thread, args=thread_args, daemon=True)
+                thread = threading.Thread(
+                    target=simplify_text_thread,
+                    args=thread_args,
+                    daemon=True
+                )
+                st.session_state.compute_thread = thread;
+                thread.start();
+                print("Simplification thread started. Triggering rerun.");
+                st.rerun()
+
+
+# Fixed: Reset button only disabled if actively computing
+with col_copypaste:
+    copypaste_text = ''
+    if st.session_state.output_versions:
+        # Regenerate labels each time in case metadata changes (though it shouldn't here)
+        version_labels = [
+            f"ver. {i + 1} ({meta['model']}, {meta['prompt_type']}, {meta['agent_type']}, {round(meta['temperature'],3)}, tokencount={meta['tokencount']})"
+            for i, meta in enumerate(st.session_state.output_metadata)
+        ]
+        if version_labels:  # Only show if versions exist
+            # Display selected version (check index validity again)
+            if 0 <= st.session_state.selected_version_index < len(st.session_state.output_versions):
+                selected_output = st.session_state.output_versions[st.session_state.selected_version_index]
+                if not st.session_state.output_is_html:  # Raw view
+                    copypaste_text = selected_output['raw']
+                else:  # HTML view
+                    copypaste_text = selected_output['html']
+        else:  # No versions to select (shouldn't happen if output_versions check passed)
+            raise Exception('BAD OUTPUT DATA')
+    st_copy_to_clipboard(copypaste_text,r"📋 Copy text") #key='output_copypaste')
+
 # --- Input Box ---
 with col_input:
-    col_input_header, col_input_toggle,col_copytext = st.columns([3,1,1])
+    col_input_header, col_input_toggle,dummy1 = st.columns([3,1,1])
     with col_input_header:
         st.subheader("📝 Input texts")
     with col_input_toggle:
@@ -383,10 +431,6 @@ with col_input:
             new_text = st.session_state.html_parsed_text
 
     #------------------------------
-    with col_copytext:
-        pass
-        #print(f'col_input copy-paste obtained with length {len(new_text)}')
-        #st_copy_to_clipboard(new_text, r"🗐") # ,key='input_copypaste'
 
     # Fixed: Text area is disabled ONLY if it's editable AND computing
     # We disable editing to prevent conflicts with background threads reading the data.
@@ -431,30 +475,11 @@ with col_output:
         st.checkbox("Clean view", key="output_is_html",disabled=False) # st.session_state.output_is_html value=True
 
     #----------------------------
-    # # Fixed: Output selection NOT disabled during computation
-    # output_disabled = False
-    #
-    # new_text=''
-    # if st.session_state.output_versions:
-    #     # Regenerate labels each time in case metadata changes (though it shouldn't here)
-    #     version_labels = [
-    #         f"ver. {i+1} ({meta['model']}, {meta['prompt_type']}, {meta['agent_type']}, {meta['temperature']}, tokencount={meta['tokencount']})"
-    #         for i, meta in enumerate(st.session_state.output_metadata)
-    #     ]
-    #     if version_labels: # Only show if versions exist
-    #         # Display selected version (check index validity again)
-    #         if 0 <= st.session_state.selected_version_index < len(st.session_state.output_versions):
-    #             selected_output = st.session_state.output_versions[st.session_state.selected_version_index]
-    #             if not st.session_state.output_is_html: # Raw view
-    #                 new_text= selected_output['raw']
-    #             else: # HTML view
-    #                 new_text = selected_output['html']
-    #     else: # No versions to select (shouldn't happen if output_versions check passed)
-    #         raise Exception('BAD OUTPUT DATA')
+    # Fixed: Output selection NOT disabled during computation
+
 
     #----------------------------
     output_disabled = False
-    copypaste_text = ''
     if st.session_state.output_versions:
         # Regenerate labels each time in case metadata changes (though it shouldn't here)
         version_labels = [
@@ -492,7 +517,8 @@ with col_output:
         st.markdown(f"""<div style="height:600px; overflow:auto; padding:10px; background-color:#f5f5f5; border:1px solid #ddd; border-radius:4px; color:#999;">No output generated yet</div> """, unsafe_allow_html=True)
 
 # ---------- ACTION BUTTONS ----------
-col_readfile, col_parse,col_sample,col_dummy1, col_simplify,col_copypaste,col_reset = st.columns([1,1,0.75,2,1,1,1])
+#col_readfile, col_parse,col_sample,col_dummy1, col_simplify,col_copypaste,col_reset = st.columns([1,1,0.75,2,1,1,1])
+col_readfile, col_parse,col_sample,col_reset,col_dummy1 = st.columns([1,1,0.75,0.75,5])
 
 with col_readfile:
     st.file_uploader("Upload file",on_change=process_file,type=["txt", "pdf", "docx"],label_visibility="collapsed",key="uploaded_file")
@@ -528,36 +554,6 @@ with col_sample:
         st.session_state.parsed_available=True
         st.session_state.active_text = 'PARSED'
         st.rerun()
-
-with col_simplify:
-    simplify_disabled = ( st.session_state.status != "Ready" or not st.session_state.parsed_available )
-    if st.button("🧠 Simplify Text", disabled=simplify_disabled, use_container_width=True):
-        if st.session_state.compute_thread is None:
-            if len(st.session_state.parsed_text) < 10:
-                st.error(f'⚠️ Parsed text too short {len(st.session_state.parsed_text)}, nothing to simplify')
-            elif not (('<title>' in st.session_state.parsed_text) and ('</title>' in st.session_state.parsed_text)):
-                st.error(f'⚠️ Input text does not appear to be parsed. Parse it first with proper tags.')
-            else:
-                print("Starting simplification thread...")
-                st.session_state.status = "simplifying";
-                st.session_state.additional_status_text='calling LLM...'
-                st.session_state.simplify_result = None
-                current_settings = {"model": st.session_state.model, "agent_type": st.session_state.agent_type, "prompt_type": st.session_state.prompt_type, "temperature": st.session_state.temperature, "tokencount": st.session_state.tokencount };
-                thread_args = (st.session_state.parsed_text, current_settings,st.session_state.result_queue)
-                #thread = threading.Thread(target=simplify_text_thread, args=thread_args, daemon=True)
-                thread = threading.Thread(
-                    target=simplify_text_thread,
-                    args=thread_args,
-                    daemon=True
-                )
-                st.session_state.compute_thread = thread;
-                thread.start();
-                print("Simplification thread started. Triggering rerun.");
-                st.rerun()
-
-# Fixed: Reset button only disabled if actively computing
-with col_copypaste:
-    st_copy_to_clipboard(copypaste_text,r"📋 Copy text") #key='output_copypaste')
 
 with col_reset:
     reset_disabled = st.session_state.status in ["parsing", "simplifying"]

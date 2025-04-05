@@ -1,26 +1,14 @@
 import os
-import pickle
 import io
-import time
 import re
-import random
-import ast
-import numpy as np
-import pandas as pd
-import base64
 import markdown2
-from datetime import datetime
-
 import tiktoken
-from bs4 import BeautifulSoup, NavigableString
 from xhtml2pdf import pisa
-from PIL import Image, ImageDraw
 from dotenv import load_dotenv
 import openai
-from litellm import completion
 from bs4 import BeautifulSoup, NavigableString, Tag
 from html import escape
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import anthropic
 
 # -----------------------------
@@ -29,14 +17,13 @@ import anthropic
 load_dotenv('.env')
 os.environ["ANTHROPIC_API_KEY"] = os.getenv("ANTHROPIC_API_KEY")
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
-os.environ["GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY")
 
 client_openai = openai.OpenAI()
 client_anthropic = anthropic.Anthropic()
 
 FACTCORRECT_model = "gpt-4o"
 PARSER_model =  "gpt-4o"
-WRITER_models = ['claude-3-7-sonnet-20250219','gpt-4o-2024-08-06']
+WRITER_models = ['gpt-4o-2024-08-06','claude-3-7-sonnet-20250219']
 
 PROMPT_writer = {
     'prompt_22':
@@ -346,7 +333,7 @@ Output:
 
 Ihmiset ovat varautuneet helteisiin ostamalla viilentimiä ja ilmastointilaitteita. Monet kaupat ilmoittavat, että tuulettimet on myyty loppuun.
 
-<quote>– Tuuletinvarastomme tyhjenivät nopeasti, kertoo kauppias Mikko Virtanen.</quote>
+<quote> Tuuletinvarastomme tyhjenivät nopeasti, kertoo kauppias Mikko Virtanen.</quote>
 ```
 
 **Example 2: Article with existing HTML tags**
@@ -623,9 +610,21 @@ def tagged_text_to_noncolored_html(tagged_text):
     return html_output
 
 class FactCheckedText(BaseModel):
-    critical_errors_found: bool
-    list_of_critical_errors: list[str]
-    new_text: str
+    critical_errors_found: bool = Field(
+        ...,
+        title="Critical Errors Found",
+        description="Indicates whether any critical errors were found in the text (boolean)."
+    )
+    list_of_critical_errors: list[str] = Field(
+        ...,
+        title="List of Critical Errors",
+        description="A list containing descriptions of each critical error identified."
+    )
+    new_text: str = Field(
+        ...,
+        title="New Corrected Text",
+        description="The revised version of the original text after corrections."
+    )
 
 def clean_generated_text(text):
     """Clean up generated text by removing tags and extra whitespace"""
@@ -674,24 +673,27 @@ def simplify_text(parsed_text: str,session_state) -> str:
         tokencount = int(count_tokens(parsed_text,model)*0.80)
         prompt = PROMPT_writer[prompt_type].replace('{TOKENS}',f' Sopiva selkokielelle mukautetun tekstin pituus on noin 80% alkuperäisestä eli noin {tokencount} tokenia. ')
     else:
-        prompt = PROMPT_writer[prompt_type].replace('{TOKENS}',f" ")
+        prompt = PROMPT_writer[prompt_type].replace('{TOKENS}'," ")
 
     input = f'Mukauta seuraava uutisteksti selkokielelle:\n\n{parsed_text}'
-    response = get_llm_response(system=prompt,input=input,model=model,temperature=temp)
-
-    response = clean_generated_text(response)
+    writer_response = get_llm_response(system=prompt,input=input,model=model,temperature=temp)
+    writer_response = clean_generated_text(writer_response)
 
     if 'fakta' in agent:
         PROMPT = PROMPT_error_correct
-        PROMPT = PROMPT.replace('{new_text}',response).replace('{old_text}',parsed_text)
-        resp = get_llm_response(system=None,input=PROMPT,model=FACTCORRECT_model,temperature=0,responseformat=FactCheckedText)
-
-        response = resp.model_dump()
+        PROMPT = PROMPT.replace('{new_text}',writer_response).replace('{old_text}',parsed_text)
+        corrector_response = get_llm_response(system=None,input=PROMPT,model=FACTCORRECT_model,temperature=0,responseformat=FactCheckedText)
+        response = corrector_response.model_dump()
         if response['critical_errors_found']:
-            print(f'fact-checker identified and corrected the following {len(response["list_of_critical_errors"])} critical errors:')
+            print(f'!!! fact-checker identified and corrected the following {len(response["list_of_critical_errors"])} critical errors:')
             for error in response['list_of_critical_errors']:
                 print(f'...{error}')
-        response = clean_generated_text(response['new_text'])
-        response = response.replace('<tarkastettava_teksti_B>','').replace('</tarkastettava_teksti_B>','').strip()
+            response = clean_generated_text(response['new_text'])
+            response = response.replace('<tarkastettava_teksti_B>', '').replace('</tarkastettava_teksti_B>','').strip()
+        else:
+            print(f'fact-checker did not find critical errors, passing original text through')
+            response = writer_response
+    else:
+        response = writer_response
 
     return response
