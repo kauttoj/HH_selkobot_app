@@ -244,15 +244,16 @@ Muokkaa teksti niin, että se on helppolukuinen. Tekstin tulee olla selkeä, kii
 Nyt, mukauta annettu uutisteksti selkokielelle noudattaen näitä ohjeita.{TOKENS}Merkitse kirjoittamasi selkokielinen teksti <simplified_article> tagien sisään.    
     '''
 }
+PROMPT_error_correct = '''Olet uutisten faktantarkastaja, jonka tehtävä on tarkastaa että annetun uuden tekstin faktasisältö vastaa alkuperäistä vanhaa tekstiä. Korjaat uuden tekstin tarvittaessa.
 
-PROMPT_error_correct = '''Olet uutisten faktantarkastaja, jonka tehtävä on tarkastaa että annetun uuden tekstin faktasisältö vastaa alkuperäistä vanhaa tekstiä. Korjaat uuden tekstin tarvittaessa. 
-Keskity ainoastaan kriittisiin asiavirheisiin. Tee VAIN VÄLTTÄMÄTTÖMÄT korjaukset, jotka vakavasti vääristävät uuden tekstin asiasisältöä. Jätä teksti muilta osin täysin ennalleen. Et huomio kielellisiä ilmaisuja, tekstin muotoilua, tekstin ulkoasua tai lausejärjestystä, jotka eivät vaikuta asiasisältöön.
+Keskity ainoastaan kriittisiin asiavirheisiin. Tee VAIN VÄLTTÄMÄTTÖMÄT korjaukset, jotka vakavasti vääristävät uuden tekstin asiasisältöä. Jätä teksti muilta osin täysin ennalleen. Et huomio kielellisiä ilmaisuja, tekstin muotoilua, tekstin ulkoasua tai lausejärjestystä, jotka eivät vaikuta asiasisältöön. Tietojen poisjättäminen ei ole automaattisesti virhe, kunhan se ei muuta olennaisesti tekstin ydinsisältöä tai väitteitä.
 
 Sinun tulee aina säilyttää seuraavat tekstissä olevat TAGIT sellaisenaan:
 - `<title>` otsikko
 - `<lead>` ingressi
 - `<subtitle>` väliotsikot
 - `<quote>` suorat lainaukset
+
 Tageja käytetään tekstin ladontaan verkkosivulle, ne eivät kuulu faktantarkastuksen piiriin. Jätä nämä tagit paikoilleen.
 
 Seuraavassa saat alkuperäisen vanhan ja uuden tarkastettavan tekstin.
@@ -271,33 +272,34 @@ Seuraavassa saat alkuperäisen vanhan ja uuden tarkastettavan tekstin.
 
 # TEHTÄVÄ
 
-Vertaa alkuperäisessä (A) ja tarkastettavassa (B) tekstissä kerrottuja faktoja toisiinsa. Jos löydät vakavia asiavirheitä tarkastettavassa tekstissä, listaa ne kaikki ja kirjoita uusi, korjattu versio tekstistä B. Muussa tapauksessa palautat tekstin B alkuperäisessä muodossaan ilman mitään muutoksia.
+Vertaa alkuperäisessä (A) ja tarkastettavassa (B) tekstissä kerrottuja faktoja toisiinsa. Jos löydät vakavia asiavirheitä tarkastettavassa tekstissä, listaa ne kaikki ja kirjoita uusi, korjattu versio tekstistä B. Muussa tapauksessa palautat tekstin B sellaisenaan ilman mitään muutoksia. Seuraa alla olevia ohjeita tarkasti.
 
-Tarkastettavat asiat sisältävät VAIN seuraavat:
-1. lukumäärät ja numerot
-2. erisnimet
-3. ammattinimikkeet
-4. keskeiset tapahtumat
-5. keskeiset tärkeät väitteet
-6. ajankohdat
+**Tarkastettavat asiat sisältävät VAIN seuraavat:**
+1. lukumäärät ja numerot  
+2. erisnimet  
+3. ammattinimikkeet  
+4. keskeiset tapahtumat  
+5. keskeiset tärkeät väitteet  
+6. ajankohdat  
 
 Nämä eivät saa muuttua oleellisesti.
 
-Huomioita:
-- Uusi teksti voi olla lyhennetty ja tiivistetty versio alkuperäisestä, eikä tätä lasketa virheeksi.
-- Uudessa tekstissä asiat voi olla selitetty eri tavalla ja yksinkertaisemmin, eikä tätä lasketa virheeksi.
-- Jos tarkastettavassa tekstissä (B) on kokonaan uutta tietoa, jota ei löydy tekstistä (A), se katsotaan virheeksi ja on poistettava. Emme halua uutta keksittyä tietoa, joka ei perustu tekstin A faktoihin.
-- Pieniä numeroiden tai lukumäärien pyöristyksiä tai suuntaa-antavia mainintoja (esim. "yli kaksi miljoonaa" vs. "2 120 000") voi sallia, jos ne eivät merkittävästi vääristä tekstin ydinsisältöä. Älä kuitenkaan muuta lukumääriä tai päiväyksiä ilman syytä (esim. 200 → 210 tai 3.5.2024 → 4.5.2024).
-- Jos löydät asiavirheitä ja kirjoitat korjatun version tekstistä, tekstin rakenne tai pituus ei saa muuttua merkittävästi (sallittu ±5 %, noin ±20 sanaa). Pidä muuten teksti ennallaan.
-- Tee vain välttämättömät korjaukset, jotka selvästi vääristävät uuden tekstin asiasisältöä. Jätä teksti muilta osin ennalleen.
-- Korjaa vain vakavat asiavirheet, älä koskaan puutu kieli- tai tyyliseikkoihin.
-- Älä koskaan muuta tekstissä olevia tageja, vaan pidä ne ennallaan.
+**Ohjeita:**
+- **Uusi teksti (B) on tiivistelmä eikä tarvitse sisältää kaikkia tietoja tekstistä (A).** Tietojen poisjättäminen ei ole automaattisesti virhe, kunhan se ei muuta olennaisesti tekstin ydinsisältöä tai väitteitä.  
+- Jos uusi teksti sisältää tietoa, jota ei ole löydettävissä tekstistä (A), se on vakava virhe ja poistettava. 
+- Uudessa tekstissä asiat voi olla selitetty eri tavalla ja yksinkertaisemmin, eikä tätä lasketa virheeksi.  
+- Pieniä numeroiden tai lukumäärien pyöristyksiä tai suuntaa-antavia mainintoja (esim. "yli kaksi miljoonaa" vs. "2 120 000") voi sallia, jos ne eivät merkittävästi vääristä tekstin ydinsisältöä. Älä muuta lukumääriä tai päiväyksiä ilman syytä (esim. 200 → 210 tai 3.5.2024 → 4.5.2024).  
+- Korjaa vain vakavat asiavirheet, älä koskaan puutu kieli- tai tyyliseikkoihin.  
+- Jos löydät asiavirheitä ja kirjoitat korjatun version tekstistä, tekstin pituus ei saa muuttua merkittävästi (sallittu ±5 %, noin ±20 sanaa).  
+- Tee aina vain välttämättömät korjaukset, jotka selvästi vääristävät uuden tekstin asiasisältöä. Jätä teksti muilta osin ennalleen.  
+- Älä koskaan muuta tekstissä olevia tageja, vaan pidä ne aina ennallaan.
 
 # VASTAUS
 
 Jos uudessa tekstissä B ei ole vakavia asiavirheitä, palauta teksti B kokonaan täsmälleen sellaisena kuin sen sait. Muussa tapauksessa:
-1. Listaa kaikki löydetyt virheet.
-2. Kirjoita kokonaan uusi korjattu versio tekstistä B (muista säilyttää tagit).'''
+1. Listaa kaikki löydetyt vakavat virheet.  
+2. Kirjoita kokonaan uusi korjattu versio tekstistä B (muista säilyttää tagit).
+'''
 
 PROMPT_parse_text = '''
 You are a text parser designed to analyze Finnish text articles and format them using exactly four custom tags: `<title>`, `<lead>`, `<subtitle>`, and `<quote>`. Your goal is to identify parts of the article text that belong to these four special categories and tag them accordingly.
