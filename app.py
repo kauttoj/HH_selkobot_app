@@ -19,6 +19,22 @@ st.set_page_config(page_title="HH Selbobot", layout="wide")
 
 # ---------- CUSTOM STYLES ----------
 # ... (Styles remain the same) ...
+
+HTML_style = '''<style>
+    .mybox {
+        box-sizing: border-box;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border: 1px solid black;
+        border-radius: 4px;
+        font-family: sans-serif;
+        overflow-y: auto;
+        height: 100%;
+        width: 100%;
+        white-space: normal;
+    }
+</style>'''
+
 st.markdown("""
     <style>
     .title-font {
@@ -32,7 +48,6 @@ st.markdown("""
         .parsed-disabled { color: gray; font-style: italic; }
         textarea[aria-label="Ask something about the text..."] { min-height: 3em !important; }
         button:disabled { background-color: #ddd !important; color: #888 !important; cursor: not-allowed !important; }
-    .html-text-box { padding: 10px; background-color: #f0f0f0; border: 1px solid black; border-radius: 5px; font-family: sans-serif; overflow-y: auto; height: 600px; }
     textarea { border: 1px solid black !important; background-color: #f0f0f0 !important; border-radius: 4px; }    
     </style>
 """, unsafe_allow_html=True)
@@ -45,7 +60,7 @@ st.markdown("""
 <b>📘 Usage Instructions</b><br><br>
 <b>1. Input text:</b> Insert raw or parsed text by writing, copy-pasting, or reading from a file.<br>
 <b>2. Parse raw text:</b> If not parsing yourself, use automatic parsing. Manually fix any mistakes.<br>
-<b>3. Set parameters:</b> Try different <i>models</i>, <i>prompts</i>, and <i>agent types</i>. Recommended temperature is close to <b>0.40</b>.<br>
+<b>3. Set parameters:</b> Try different <i>models</i>, <i>prompts</i>, and <i>agent types</i>. Keep temperature close to <b>0.40</b>.<br>
 <b>4. Simplify:</b> Simplify parsed text. This takes <b>5–30 seconds</b> (depending on backend). You can generate and view multiple versions.<br><br>
 <b>Agents:</b> Muuntaja = writer only, Muuntaja & faktantarkastaja = writer followed by fact correction.<br>
 <b>80% pituusprompti:</b> Include prompt instruction to aim for ~80% of original text length.<br><br>
@@ -53,31 +68,52 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+example_text = '''<title>Syyrialainen huippukokki avasi ravintolan Helsinkiin – nyt Tawook Lab kerää ylistäviä arvioita</title>
+<lead>Helsinkiin avattu syyrialainen ravintola on saanut erinomaisen vastaanoton. Ravintolaa pyörittävä pariskunta kertoo, mikä Tawook Labista tekee poikkeuksellisen.</lead>
+Google-arvosteluista on tullut tärkeä tekijä ravintoloiden erottautumiselle. Asiakas jättää käynnistään merkinnän, ja arvosteluiden keskiarvo komeilee Googlen hakutuloksissa ravintolan nimen yhteydessä.
+Harva ravintola on kerännyt niin yksimielisen kiittäviä arvioita kuin Helsingin keskustaan joulukuussa avattu Tawook Lab. Pieni syyrialainen ravintola oli saanut puolessa vuodessa Googlessa runsaat 300 arviota, lähes kaikissa täydet viisi tähteä.
+<subtitle>Vahvuuksia</subtitle>
+Google-arvosteluissa hehkutetaan Tawook Labin ruokaa, palvelua ja kotoisaa tunnelmaa.
+Jututetaanpa yhtä asiakkaista paikan päällä. Lounaskeittoa lusikoiva Stephen Webb kertoo löytäneensä Tawook Labin ystävänsä suosituksesta. Ensimmäisellä käyntikerralla ravintolassa syntyi luonteva keskustelu, johon osallistuivat sekä paikan pitäjät että toisiaan ennalta tuntemattomat asiakkaat.
+<quote>”Juttelimme elämästä, niitä näitä. Nyt syön täällä kolmatta kertaa. Tykkään paikan yhteisöllisyydestä. Ravintoloissa hyvin harvoin törmää tällaiseen olohuonemaisuuteen”, Webb luonnehtii.</quote>
+Palaute lämmittää ravintolaa pyörittävää syyrialaista avioparia. Kasem Al-Hallak vastaa ruoasta ja Waed Hejazi palvelusta.
+<quote>”Eräs asiakas kertoi, että olemme vaimon kanssa jo julkkiksia hänen työpaikallaan. Puolet ravintolan menestyksestä muodostuu ruoasta ja puolet vieraanvaraisuudesta. Vaimoni ansiosta asiakkaat palaavat uudestaan ja uudestaan”, Kasem Al-Hallak sanoo.</quote>
+Pariskunta huomioi haastattelun aikana jokaisen ravintolaan saapuvan asiakkaan ja vaihtaa heidän kanssaan vähintään muutaman sanan, kenen kanssa mistäkin.
+Asiakaspalvelu on niin välitöntä, että on vaikea uskoa, että Tawook Lab on Hejazin ensimmäinen työpaikka. Pariskunta asui aikaisemmin Saudi-Arabiassa, jossa Al-Hallak työskenteli ravintoloissa ja Hejazi hoiti maan tavan mukaisesti perhettä kotona.
+Hejazin lause keskeytyy liikutuksen kyyneliin, kun hän kertoo ravintolassa saamastaan palautteesta.
+<quote>”Asiakas halasi ja kertoi, että hänelle tuli tunne kuin olisi palannut äitinsä ruokapöytään. Olemme järjestäneet kotona paljon juhlia, rakastan uusien ihmisten kohtaamista ja olen aina tykännyt kestitsemisestä. Ravintola on meille kuin toinen koti, ja aviomiehen kanssa on ihanaa tehdä töitä – vaikka välillä otammekin vähän yhteen. Työn ainoa raskas puoli on työpäivien pituus”, Hejazi kertoo.</quote>
+<subtitle>Uhkia</subtitle>
+Pariskunnan kolme lasta auttavat tarpeen mukaan ravintolassa. 17-vuotias tytär hoitaa somen. Al-Hallakin ja Hejazin työpäivät venyvät helposti silti aamusta iltamyöhään.
+Al-Hallakille armoton työtahti ei ole uutta. Hän laskee työskennelleensä ravintola- ja hotellialalla kaikkiaan 20 vuotta. Hän nousi pääkokiksi armenialaista ruokaa tarjoavan Lusin-ketjun ravintolassa, joka piti monta vuotta kärkipaikkaa Saudi-Arabian pääkaupungin Riadin Tripadvisor-listauksissa. Lisäksi Al-Hallak konseptoi Mira Foods -konsernin muita ravintoloita. Kiireisimpinä aikoina vapaapäivät jäivät niin vähiin, että Hejazi soitti jo miehensä pomolle.
+<quote>”Se oli rankkaa aikaa, olin aivan poikki. Samaan aikaan vaimo hoiti kaiken kotona. Muutimme Suomeen, ja nyt yhteistä aikaa kertyy lähes 24 tuntia vuorokaudessa. Menestys on minun juttuni. Teen töitä kellon ympäri, vaikka sitten terveyteni uhalla. Kun kotona nukkumaan mennessä selailemme kiittäviä Google-arvioita, päivä on pelastettu”, Al-Hallak kertoo.</quote>
+Taskuun saisi silti jäädä enemmänkin.
+<quote>”Liiketilan vuokra on tosi korkea ja raaka-aineet kalliita. Ravintolan tuotto on ihan hyvä, mutta ei niin hyvä kuin sen näillä työtunneilla kuuluisi olla”, Al-Hallak sanoo.</quote>
+<subtitle>Haasteita</subtitle>
+Perhe muutti Suomeen vuoden 2020 taitteessa, juuri ennen koronapandemian puhkeamista.
+Al-Hallak kertoo käyttäneensä paljon aikaa maan tapojen ja sääntöjen opetteluun. Hän oli mukana startup-yrityksessä ja opiskeli sekä yrityksen perustamista että tietotekniikkaa, mistä on ollut hyötyä ravintolan järjestelmien kanssa. Suomen kieli ei vielä taivu, mutta Al-Hallak sanoo osaavansa sitä riittävästi tullakseen toimeen.
+Tawook Lab sijaitsee Citykäytävässä Helsingin ydinkeskustassa, vilkkaan kulkuväylän varrella. Haastattelu tehdään hiljaisempana hetkenä iltapäivällä, lounasajan jälkeen. Moni katselee ruokalistaa ravintolan ulkopuolella mutta kävelee lopulta ohi. Syyrialaisen ruoan eksoottisuus on sekä vahvuus että haaste.
+<quote>”Uuden maistaminen voi olla pelottavaa, ja ehkä on helpompi valita pizza”, Al-Hallak miettii.</quote>
+<quote>”Mutta kun suomalaisen saa kerran houkuteltua tänne, niin hän alkaa käydä koko ajan. Lounasaikaan meillä käy keskimäärin 40–50 asiakasta. Perjantai on hiljaisempi, koska se on monessa työpaikassa etäpäivä. Keskiviikot ovat vilkkaita.”</quote>
+<subtitle>Mahdollisuuksia</subtitle>
+Al-Hallakin työtausta fine dining -kokkina maistuu ja näkyy Tawook Labin ruoassa. Perinteistä ja modernia yhdistävät annokset ovat huoliteltuja. Ote on kokeileva ja leikkisä. Annosten hinnat asettuvat kymmenen ja kahdenkymmenen euron väliin.
+<quote>”Teemme lujasti töitä sen eteen, että pystymme tarjoamaan suomalaisille oikean syyrialaisen ruokakokemuksen, pienellä fuusio-otteella”, Al-Hallak kuvailee.</quote>
+<quote>”Helsinki on hieno kaupunki, mutta tänne tarvitaan enemmän muitakin kuin sushi-, pizza- ja hampurilaisravintoloita. Pari tuttua ravintoloitsijaa suositteli minulle lounasbuffetia, mutta siihen en lähde. Haluamme muuttaa suomalaisten suhtautumista ruokaan, ja laadukkaat lautasannokset vahvistavat myös ravintolan brändiä. Valmistamme omin käsin kaiken hummuksesta kastikkeisiin, ja silloin maut oikeasti tuntee.”</quote>
+Tawook Labin taustalla on yksityinen rahoittaja. Al-Hallakin ja Hejazin suunnitelmissa on perustaa ravintoloita ympäri Suomea, ehkä maailmallekin. Tawook Labissa käy asiakkaita ympäri maailmaa, ja heidän kanssaan tulee juteltua monenlaista.
+<quote>”Mumbaista kävi yksi porukka, ja he kyselivät, olisimmeko kiinnostuneita laajentamaan sinne. Kuala Lumpurista Malesiasta tiedusteltiin 7/11-tyyppiseen kioskiketjuun, mutta sellaiseen emme ole valmiita.”</quote>'''
+
 # ---------- SESSION STATE INIT ----------
 defaults = {
     "status": "Ready",
-    "input_text": '''<title>Tehdas käynnistää mittavat rekrytoinnit Vantaalla – tarve 100 uudelle työntekijälle lähitulevaisuudessa</title>
-<lead>Kansainvälinen energianhallintayhtiö Eaton siirsi toimintonsa Espoosta Vantaalle viime vuonna.</lead>
-Energianhallintayhtiö Eaton aloittaa mittavat rekrytoinnit Vantaalla.
- Yhtiö tarvitsee tänä vuonna 70 uutta työntekijää viime vuonna valmistuneeseen kriittisten sähkönjakelujärjestelmien tehtaaseensa Tuupakkaan.
- Uusia ammattilaisia tarvitaan varsinkin tuotantoon laitteiden kokoonpanotöihin.
- Asennus- ja kokoonpanopuolen lisäksi tarvetta on testauksen ja varastologistiikan puolella.
- Myös työnjohtajille ja toimihenkilöille avautuu töitä vuoden sisällä etenkin hankinnan ja laadunvalvonnan puolella.
- <quote>Juhannukseen mennessä tavoite on rekrytoida 40 uutta työntekijää ja vuoden loppuun mennessä 70. Kasvamme lähitulevaisuudessa yhteensä noin 100 työntekijällä, ennakoi tehtaanjohtaja Petri Koskinen tiedotteessa.</quote>
-Yhdysvaltalainen pörssiyhtiö Eaton on maailman suurimpia kolmivaiheisten varavoimajärjestelmien (UPS) valmistajia.
- Yhtiön tehdas valmistui Kehä III:n varrelle Tuupakkaan loppusyksystä 2023. Yritys siirsi toimintonsa Espoosta Vantaalle entistä suurempiin tiloihin.
- Tehtaassa kehitetään ja valmistetaan varavoimajärjestelmiä (UPS), jotka suojaavat elektronisia laitteita yleisimmiltä virtaongelmilta, kuten sähkökatkoksilta ja sähköverkon häiriöiltä.
- Varavoimajärjestelmiä tarvitaan datakeskuksissa, liike- ja teollisuusrakennuksissa sekä terveydenhuollon ja meriteollisuuden kohteissa.
- Eatonin tuotantolaitos työllistää tällä hetkellä yli 300 työntekijää. Petri Koskisen mukaan lisätyövoimalle tulee edelleen tarvetta lähivuosina yhtiön liiketoiminnan kasvaessa.''',
+    "input_text": '',
     "parsed_text": "",
     "output_text": "",
     "parsed_available": False,
-    "chat_history": [],
     "last_saved_raw": "",
     "tokencount": False,
     "output_is_html": True,
     "active_text": 'RAW',
     "html_input_text": '',
+    'additional_status_text':'',
     "html_parsed_text": '',
     "view_only_mode": False,
     "output_versions": [],
@@ -85,8 +121,6 @@ Yhdysvaltalainen pörssiyhtiö Eaton on maailman suurimpia kolmivaiheisten varav
     "selected_version_index": 0,
     "compute_thread": None,
     "result_queue": queue.Queue(),
-    "input_current_text": 'no input text',
-    "output_current_text": 'no output text',
     "parse_result": None,
     "simplify_result": None,
     "model": backend.WRITER_models[0] if hasattr(backend, 'WRITER_models') and backend.WRITER_models else None,
@@ -107,8 +141,7 @@ def parse_text_thread(raw_text_arg: str,result_queue):
     raw_text = raw_text_arg
     parsed_result,clean,error_message = None,None,None
     try:
-        if len(raw_text) < 10: error_message = f'Input length {len(raw_text)}, nothing to parse'; print(f'⚠️ {error_message}')
-        elif GUI_DEBUG:
+        if GUI_DEBUG:
             print('Running dummy parsing...'); time.sleep(5)
             parsed_result = f"<title>{raw_text_arg}</title>"
             clean = backend.tagged_text_to_noncolored_html(parsed_result)
@@ -242,10 +275,48 @@ def reset_all_fields():
 
 # ---------- SIDEBAR ----------
 with st.sidebar:
-    st.markdown('<div style="position: relative; top: -20px; left: 0; font-size: 10px; color: gray;"><strong>v1.3 (UI Fixes)</strong></div>', unsafe_allow_html=True)
+    st.markdown('<div style="position: relative; top: -20px; left: 0; font-size: 10px; color: gray;"><strong>v1.0 JanneK</strong></div>', unsafe_allow_html=True)
     st.markdown("### Status")
     status_text = st.session_state.status.replace("_", " ").upper()
-    st.markdown( f"<div style='padding: 10px; background-color: {get_status_color(st.session_state.status)}; border-radius: 5px;'><strong>{status_text}</strong></div>", unsafe_allow_html=True )
+
+    # Add animated spinner if status is actively running
+    is_loading = st.session_state.status in ["parsing", "simplifying"]
+    spinner_html = '<div class="dot-flashing"></div>' if is_loading else ''
+
+    st.markdown(
+        f"""
+        <style>
+        .status-box {{
+            padding: 10px;
+            background-color: {get_status_color(st.session_state.status)};
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-family: sans-serif;
+        }}
+        .dot-flashing {{
+            position: relative;
+            width: 16px;
+            height: 16px;
+            border-radius: 6px;
+            background-color: #333;
+            animation: dotFlashing 1s infinite linear alternate;
+        }}
+        @keyframes dotFlashing {{
+            0% {{ background-color: #333; }}
+            50%, 100% {{ background-color: #ddd; }}
+        }}
+        </style>
+        <div class="status-box">{spinner_html}{status_text}</div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(f'<div style="font-size: 12px; color: black;"><strong>{st.session_state.additional_status_text}</strong></div>', unsafe_allow_html=True)
+
+    #st.markdown( f"<div style='padding: 10px; background-color: {get_status_color(st.session_state.status)}; border-radius: 5px;'><strong>{status_text}</strong></div>", unsafe_allow_html=True )
     st.markdown("---")
     st.header("⚙️ Settings")
 
@@ -265,7 +336,8 @@ with st.sidebar:
     with col_prompt: st.radio("Prompti", prompt_list, key="prompt_type", index=prompt_index, disabled=settings_disabled)
     with col_button:
         # Disable Show button only if dialog needs settings that might change mid-compute? Unlikely. Keep enabled.
-        if st.button("Show", disabled=False): show_prompt_dialog()
+        if st.button("View", disabled=False):
+            show_prompt_dialog()
     st.checkbox("80% pituusprompti", key="tokencount", value=st.session_state.tokencount, disabled=settings_disabled)
     st.number_input("Lämpötila", min_value=0.0, max_value=1.0, step=0.01, key="temperature", value=0.4, disabled=settings_disabled)
 
@@ -330,8 +402,8 @@ with col_input:
                  st.session_state.parsed_text = ""; st.session_state.html_parsed_text = ""; st.session_state.parsed_available = False
                  st.rerun()
         else: # View Raw HTML (Never disabled)
-            st.html(f"<div class='html-text-box'>{st.session_state.html_input_text}</div>")
-        st.session_state.input_current_text = st.session_state.html_input_text
+            components.html(f"{HTML_style}<div class='mybox'>{st.session_state.html_input_text}</div>", height=600, scrolling=True)
+        #st.session_state.input_current_text = st.session_state.html_input_text
     else: # PARSED view active
         if not st.session_state.view_only_mode: # Editable Parsed
             new_text = st.text_area("Parsed text", value=st.session_state.parsed_text, height=600, key="text_area_parsed", label_visibility="collapsed", disabled=input_disabled)
@@ -345,8 +417,9 @@ with col_input:
             # Ensure html_parsed_text is up-to-date before displaying
             if not st.session_state.html_parsed_text and st.session_state.parsed_text:
                  st.session_state.html_parsed_text = backend.tagged_text_to_noncolored_html(st.session_state.parsed_text)
-            st.html(f"<div class='html-text-box'>{st.session_state.html_parsed_text}</div>")
-        st.session_state.input_current_text = st.session_state.html_parsed_text
+            components.html(f"{HTML_style}<div class='mybox'>{st.session_state.html_parsed_text}</div>", height=600, scrolling=True)
+            #st.html(f"{st.session_state.html_parsed_text}")
+        #st.session_state.input_current_text = st.session_state.html_parsed_text
 
 # --- Output Box ---
 with col_output:
@@ -405,56 +478,69 @@ with col_output:
                 selected_output = st.session_state.output_versions[st.session_state.selected_version_index]
                 if not st.session_state.output_is_html: # Raw view
                     st.text_area("Output Text Raw", value=selected_output['raw'], height=600, label_visibility="collapsed", disabled=False, key=f"output_raw_{st.session_state.selected_version_index}")
-                    st.session_state.output_current_text = selected_output['raw']
+                    #st.session_state.output_current_text = selected_output['raw']
                     copypaste_text = selected_output['raw']
                 else: # HTML view
-                    st.html(f"<div class='html-text-box'>{selected_output['html']}</div>")
-                    st.session_state.output_current_text = selected_output['html']
+                    components.html(f"{HTML_style}<div class='mybox'>{selected_output['html']}</div>", height=600, scrolling=True)
+                    #st.session_state.output_current_text = selected_output['html']
                     copypaste_text = selected_output['html']
             else: # Handle edge case where index becomes invalid after selection somehow
                  raise Exception('BAD INDEX')
         else: # No versions to select (shouldn't happen if output_versions check passed)
              raise Exception('BAD OUTPUT DATA')
     else: # No output generated yet
-        st.markdown(f""" <div style="height:600px; overflow:auto; padding:10px; background-color:#f5f5f5; border:1px solid #ddd; border-radius:5px; color:#999;"> No output generated yet. Press 'Simplify Text' after parsing. </div> """, unsafe_allow_html=True)
+        st.markdown(f"""<div style="height:600px; overflow:auto; padding:10px; background-color:#f5f5f5; border:1px solid #ddd; border-radius:4px; color:#999;">No output generated yet</div> """, unsafe_allow_html=True)
 
 # ---------- ACTION BUTTONS ----------
-col_readfile, col_parse, col_dummy1, col_simplify,col_copypaste,col_reset = st.columns([1, 1,2,1,1,1])
+col_readfile, col_parse,col_sample,col_dummy1, col_simplify,col_copypaste,col_reset = st.columns([1,1,0.75,2,1,1,1])
 
 with col_readfile:
     st.file_uploader("Upload file",on_change=process_file,type=["txt", "pdf", "docx"],label_visibility="collapsed",key="uploaded_file")
 
 # Fixed: Parse/Simplify buttons are the ONLY ones disabled by status
+parse_disabled = ( st.session_state.status != "Ready" or not st.session_state.input_text )
 with col_parse:
-    parse_disabled = ( st.session_state.status != "Ready" or not st.session_state.input_text )
     if st.button("🔍 Parse Input", disabled=parse_disabled, use_container_width=True):
         if st.session_state.compute_thread is None:
-            print("Starting parsing thread...");
-            st.session_state.status = "parsing";
-            st.session_state.parse_result = None
-            thread_args = (st.session_state.input_text,st.session_state.result_queue);
-            #thread = threading.Thread(target=parse_text_thread, args=thread_args, daemon=True)
-            thread = threading.Thread(
-                target=parse_text_thread,
-                args=thread_args,
-                daemon=True
-            )
-            st.session_state.compute_thread = thread
-            thread.start()
-            print("Parsing thread started")
-            st.rerun()
+            if len(st.session_state.input_text) < 10:
+                st.error(f'⚠️ Raw text too short {len(st.session_state.input_text)}, nothing to parse')
+            else:
+                print("Starting parsing thread...");
+                st.session_state.status = "parsing";
+                st.session_state.additional_status_text = 'calling LLM...'
+                st.session_state.parse_result = None
+                thread_args = (st.session_state.input_text,st.session_state.result_queue);
+                #thread = threading.Thread(target=parse_text_thread, args=thread_args, daemon=True)
+                thread = threading.Thread(
+                    target=parse_text_thread,
+                    args=thread_args,
+                    daemon=True
+                )
+                st.session_state.compute_thread = thread
+                thread.start()
+                print("Parsing thread started")
+                st.rerun()
+
+with col_sample:
+    if st.button("Load example", disabled=False, use_container_width=True):
+        st.session_state.parsed_text = example_text
+        st.session_state.html_parsed_text = backend.tagged_text_to_noncolored_html(example_text)
+        st.session_state.parsed_available=True
+        st.session_state.active_text = 'PARSED'
+        st.rerun()
 
 with col_simplify:
     simplify_disabled = ( st.session_state.status != "Ready" or not st.session_state.parsed_available )
     if st.button("🧠 Simplify Text", disabled=simplify_disabled, use_container_width=True):
         if st.session_state.compute_thread is None:
             if len(st.session_state.parsed_text) < 10:
-                st.error(f'⚠️ Parsed text too short {len(st.session_state.parsed_text)}, nothing to parse')
+                st.error(f'⚠️ Parsed text too short {len(st.session_state.parsed_text)}, nothing to simplify')
             elif not (('<title>' in st.session_state.parsed_text) and ('</title>' in st.session_state.parsed_text)):
                 st.error(f'⚠️ Input text does not appear to be parsed. Parse it first with proper tags.')
             else:
-                print("Starting simplification thread...");
+                print("Starting simplification thread...")
                 st.session_state.status = "simplifying";
+                st.session_state.additional_status_text='calling LLM...'
                 st.session_state.simplify_result = None
                 current_settings = {"model": st.session_state.model, "agent_type": st.session_state.agent_type, "prompt_type": st.session_state.prompt_type, "temperature": st.session_state.temperature, "tokencount": st.session_state.tokencount };
                 thread_args = (st.session_state.parsed_text, current_settings,st.session_state.result_queue)
@@ -475,7 +561,7 @@ with col_copypaste:
 
 with col_reset:
     reset_disabled = st.session_state.status in ["parsing", "simplifying"]
-    st.button( "🔄 Reset", on_click=reset_all_fields, disabled=reset_disabled, use_container_width=True )
+    st.button( "🔄 Reset texts", on_click=reset_all_fields, disabled=reset_disabled, use_container_width=True )
 
 # ---------- AUTO-REFRESH and THREAD COMPLETION HANDLING ----------
 refresh_interval_ms = 500
@@ -485,6 +571,7 @@ if not st.session_state.result_queue.empty():
     st.session_state.status = "parsing_done" if st.session_state.status=='parsing' else "simplifying_done"
     st.session_state.thread_data = result
     st.session_state.compute_thread = None
+    st.session_state.additional_status_text = ''
     st.rerun()  # Rerun immediately to show the updated status
 
 if st.session_state.status == "parsing":
@@ -508,7 +595,7 @@ elif st.session_state.status == "parsing_done":
         # Fixed: Explicitly set active_text to trigger view switch *before* rerun
         if st.session_state.active_text != 'PARSED':
              st.session_state.active_text = 'PARSED'
-        st.toast("Parsing completed ✅", icon="🔍")
+        #st.toast("Parsing completed ✅", icon="🔍")
         print("Parsing state updated successfully.") # Debug print
 
     # Reset status and clear result *before* final rerun
@@ -541,7 +628,7 @@ elif st.session_state.status == "simplifying_done":
 
         # Fixed: Ensure index points to the newly added item
         st.session_state.selected_version_index = len(st.session_state.output_versions) - 1
-        st.toast(f"Simplification version {len(st.session_state.output_versions)} created ✅", icon="✨")
+        #st.toast(f"Simplification version {len(st.session_state.output_versions)} created ✅", icon="✨")
 
         print("Simplification state updated successfully.") # Debug print
 

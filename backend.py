@@ -248,173 +248,152 @@ Nyt, mukauta annettu uutisteksti selkokielelle noudattaen näitä ohjeita.{TOKEN
 PROMPT_error_correct = '''Olet uutisten faktantarkastaja, jonka tehtävä on tarkastaa että annetun uuden tekstin faktasisältö vastaa alkuperäistä vanhaa tekstiä. Korjaat uuden tekstin tarvittaessa. 
 Keskity ainoastaan kriittisiin asiavirheisiin. Tee VAIN VÄLTTÄMÄTTÖMÄT korjaukset, jotka vakavasti vääristävät uuden tekstin asiasisältöä. Jätä teksti muilta osin täysin ennalleen. Et huomio kielellisiä ilmaisuja, tekstin muotoilua, tekstin ulkoasua tai lausejärjestystä, jotka eivät vaikuta asiasisältöön.
 
- Sinun tulee aina säilyttää seuraavat tekstissä olevat TAGIT sellaisenaan:
+Sinun tulee aina säilyttää seuraavat tekstissä olevat TAGIT sellaisenaan:
 - `<title>` otsikko
 - `<lead>` ingressi
 - `<subtitle>` väliotsikot
 - `<quote>` suorat lainaukset
- Tageja käytetään tekstin ladontaan verkkosivulle, ne eivät kuulu faktantarkastuksen piiriin. Jätä nämä tagit paikoilleen.
+Tageja käytetään tekstin ladontaan verkkosivulle, ne eivät kuulu faktantarkastuksen piiriin. Jätä nämä tagit paikoilleen.
 
 Seuraavassa saat alkuperäisen vanhan ja uuden tarkastettavan tekstin.
 
- # ALKUPERÄINEN TEKSTI (teksti A)
+# ALKUPERÄINEN TEKSTI (teksti A)
 
 <alkuperäinen_teksti_A>
 {old_text}
 </alkuperäinen_teksti_A>
 
- # TARKASTETTAVA TEKSTI (teksti B)
- 
+# TARKASTETTAVA TEKSTI (teksti B)
+
 <tarkastettava_teksti_B> 
 {new_text}
-<tarkastettava_teksti_B>
+</tarkastettava_teksti_B>
 
- # TEHTÄVÄ
- 
- Vertaa alkuperäisessä (A) ja tarkastettavassa (B) tekstissä kerrottuja faktoja toisiinsa. Jos löydät vakavia asiavirheitä tarkastettavassa tekstissä, listaa ne kaikki ja kirjoita uusi, korjattu versio tekstistä B. Muussa tapauksessa palautat tekstin V alkuperäisessä muodossaan ilman mitään muutoksia.
-  
- Tarkastettavat asiat sisältävät VAIN seuraavat:
- 1. lukumäärät ja numerot
- 2. erisnimet
- 3. ammattinimikkeet
- 4. keskeiset tapahtumat
- 5. keskeiset tärkeät väitteet
- 6. ajankohdat
- 
- Nämä eivät saa muuttua oleellisesti.
- 
- Huomioita:
- - Uusi teksti voi olla lyhennetty ja tiivistetty versio alkuperäisestä, eikä tätä lasketa virheeksi.
- - Uudessa tekstissä asiat voi olla selitetty eri tavalla ja yksinkertaisemmin, eikä tätä ei lasketa virheeksi.
- - Korjaa vain vakavat asiavirheet, älä koskaan puutu kieli tai tyyliseikkoihin.
- - Jos löydät asiavirheitä ja kirjoitat korjatun version tekstistä, tekstin pituus ei saa muuttua merkittävästi.
- - Tee aina vain välttämättömät korjaukset, jotka selvästi vääristävät uuden tekstin asiasisältöä. Jätä teksti muilta osin ennalleen.
- - Älä koskaan muuta tekstissä olevia tageja, vaan pidä ne aina ennallaan.
+# TEHTÄVÄ
 
- # VASTAUS
- 
-Jos uudessa tekstissä B ei ole vakavia asiavirheitä, palauta teksti B sellaisenaan. Muussa tapauksessa listaa kaikki virheet ja kirjoita kokonainen uusi korjattu versio tekstistä B. 
-'''
+Vertaa alkuperäisessä (A) ja tarkastettavassa (B) tekstissä kerrottuja faktoja toisiinsa. Jos löydät vakavia asiavirheitä tarkastettavassa tekstissä, listaa ne kaikki ja kirjoita uusi, korjattu versio tekstistä B. Muussa tapauksessa palautat tekstin B alkuperäisessä muodossaan ilman mitään muutoksia.
+
+Tarkastettavat asiat sisältävät VAIN seuraavat:
+1. lukumäärät ja numerot
+2. erisnimet
+3. ammattinimikkeet
+4. keskeiset tapahtumat
+5. keskeiset tärkeät väitteet
+6. ajankohdat
+
+Nämä eivät saa muuttua oleellisesti.
+
+Huomioita:
+- Uusi teksti voi olla lyhennetty ja tiivistetty versio alkuperäisestä, eikä tätä lasketa virheeksi.
+- Uudessa tekstissä asiat voi olla selitetty eri tavalla ja yksinkertaisemmin, eikä tätä lasketa virheeksi.
+- Jos tarkastettavassa tekstissä (B) on kokonaan uutta tietoa, jota ei löydy tekstistä (A), se katsotaan virheeksi ja on poistettava. Emme halua uutta keksittyä tietoa, joka ei perustu tekstin A faktoihin.
+- Pieniä numeroiden tai lukumäärien pyöristyksiä tai suuntaa-antavia mainintoja (esim. "yli kaksi miljoonaa" vs. "2 120 000") voi sallia, jos ne eivät merkittävästi vääristä tekstin ydinsisältöä. Älä kuitenkaan muuta lukumääriä tai päiväyksiä ilman syytä (esim. 200 → 210 tai 3.5.2024 → 4.5.2024).
+- Jos löydät asiavirheitä ja kirjoitat korjatun version tekstistä, tekstin rakenne tai pituus ei saa muuttua merkittävästi (sallittu ±5 %, noin ±20 sanaa). Pidä muuten teksti ennallaan.
+- Tee vain välttämättömät korjaukset, jotka selvästi vääristävät uuden tekstin asiasisältöä. Jätä teksti muilta osin ennalleen.
+- Korjaa vain vakavat asiavirheet, älä koskaan puutu kieli- tai tyyliseikkoihin.
+- Älä koskaan muuta tekstissä olevia tageja, vaan pidä ne ennallaan.
+
+# VASTAUS
+
+Jos uudessa tekstissä B ei ole vakavia asiavirheitä, palauta teksti B kokonaan täsmälleen sellaisena kuin sen sait. Muussa tapauksessa:
+1. Listaa kaikki löydetyt virheet.
+2. Kirjoita kokonaan uusi korjattu versio tekstistä B (muista säilyttää tagit).'''
 
 PROMPT_parse_text = '''
-You are a text parser who reads Finnish input text articles, parses them using given 4 standard tags and returns a parsed version of the text article. You need to identify and tag the following components of the text: title, lead, subtitles and quotes.
+You are a text parser designed to analyze Finnish text articles and format them using exactly four custom tags: `<title>`, `<lead>`, `<subtitle>`, and `<quote>`. Your goal is to identify parts of the article text that belong to these four special categories and tag them accordingly.
 
-During parsing, your will check and add these 4 types of tags into the text. These tags are the following:
-- `<title>` Title of the article, always first part of the text.
-- `<lead>` Lead (ingress) of the article, which always follows the title if present.
-- `<subtitle>` Subtitles appearing in the middle of the article. Typically present only for long articles. Each article can contain anything between 0 and 10 subtitles. Subtitles clearly separate different parts of the article content. Not all articles contains subtitles.
-- `<quote>` Direct quotes that are marked with some type of dashes, lines or quotations, such as “, ”, «, ❞ or 〞. Not all articles contain quotes, while some may contain several.
+### Tag Definitions:
+- `<title>`: Mandatory tag. The main title of the article, always appearing at the beginning of the text.
+- `<lead>`: Optional tag. The introductory paragraph(s) directly following the title, summarizing the article’s main point. Include only if clearly identifiable.
+- `<subtitle>`: Optional tag. Subheadings within the text clearly dividing sections of content. Typically appear in longer articles that have distinct sections. Do not add subtitles to short articles with no clear sections.
+- `<quote>`: Optional tag. Direct quotations explicitly marked with quotation symbols or dashes such as “, ”, «, ❞, or 〞. Include only if clearly identifiable.
 
-Each text MUST contain one title, while other tag types are optional and depend on text content and length. 
+### Tagging Instructions:
+- Every article MUST contain exactly one `<title>` tag.
+- Include `<lead>`, `<subtitle>`, and `<quote>` tags ONLY if clearly identifiable. When unsure, omit these optional tags entirely.
+- Minimize tagging to only essential tags. Fewer tags are preferable; do NOT tag content unnecessarily.
+- Preserve the original text exactly as provided. Do NOT alter wording, punctuation, or grammar.
 
-Below are three examples of potential text inputs and the proper output for all of them.
+### Handling Input:
+- If the input article is already correctly tagged using only the standard custom tags (`<title>`, `<lead>`, `<subtitle>`, `<quote>`), do NOT make any changes. Return the text as-is.
+- Do NOT rewrite, rephrase, or manipulate any part of the article’s wording. You must preserve full journalistic integrity: facts, phrasing, tone, and style must remain unchanged.
+- Input articles may be completely unformatted, partially formatted with random or unusual tags, or contain HTML or other formatting.
+- Input articles may be completely unformatted, partially formatted with random or unusual tags, or contain HTML or other formatting.
+- Your task is to carefully analyze the content and context, using any available cues to determine correct placement for tags.
+- Output text must contain ONLY the custom tags listed above (`<title>`, `<lead>`, `<subtitle>`, `<quote>`), along with regular, untagged text. Remove all other formatting or tags.
 
-## Example 1: no internal structure, need to estimate all tags.
+### Examples:
 
-Espoossa saa kesällä puistoruokaa 16 vuoden tauon jälkeen
+**Example 1: Plain text article**
 
-Lapset saavat syödä ilmaisen lounaan tänä kesänä viidessä espoolaisessa leikkipuistossa. Kyseessä on kokeilu.
+Input:
+```
+Kesän lämpöaalto saavuttaa Suomen ensi viikolla
 
-Lapset saavat tänä kesänä ilmaista ruokaa myös Espoon leikkipuistoissa. Ruokaa saa heinäkuussa Soukan, Perkkaan, Olarin, Suvelan ja Tapiolan asukaspuistoissa.
+Meteorologit ennustavat, että lämpötila nousee yli 30 asteeseen.
 
-Ruokailuun ei tarvitse ilmoittautua. Mukaan täytyy ottaa kotoa lautanen, lusikka, haarukka ja muki. Kaikille on tarjolla sama ruoka. Kahtena tai kolmena päivänä viikossa se on kasvisruoka.
+Ihmiset ovat varautuneet helteisiin ostamalla viilentimiä ja ilmastointilaitteita. Monet kaupat ilmoittavat, että tuulettimet on myyty loppuun.
 
-Espoossa järjestettiin puistoruokailu viimeksi 16 vuotta sitten. Sen jälkeen kaupunki halusi säästää. Puistojen ruokailuissa syntyi hävikkiä: 16 prosenttia ruoasta meni roskikseen. Tätä pidettiin ongelmana.
+– Tuuletinvarastomme tyhjenivät nopeasti, kertoo kauppias Mikko Virtanen.
+```
+Output:
+```
+<title>Kesän lämpöaalto saavuttaa Suomen ensi viikolla</title>
 
-Puistoruokailuista kerätään tänä vuonna tietoa
+<lead>Meteorologit ennustavat, että lämpötila nousee yli 30 asteeseen.</lead>
 
-Tälle vuodelle Espoon kaupunginvaltuusto varasi lähes 150 000 euroa puistoruokailuihin.
+Ihmiset ovat varautuneet helteisiin ostamalla viilentimiä ja ilmastointilaitteita. Monet kaupat ilmoittavat, että tuulettimet on myyty loppuun.
 
-– Keräämme tietoa siitä, miten ruokailu järjestetään ja paljonko se maksaa, kertoo aluepäällikkö Nina Konttinen.
+<quote>– Tuuletinvarastomme tyhjenivät nopeasti, kertoo kauppias Mikko Virtanen.</quote>
+```
 
-Hän vastaa Espoossa asukaspuistoista.
+**Example 2: Article with existing HTML tags**
 
-Kokeilun jälkeen päätetään, jatketaanko puistoruokailua Espoossa seuraavina kesinä.
+Input:
+```
+<h1>Suomen talouskasvu hidastuu tänä vuonna</h1>
+<p>Asiantuntijoiden mukaan inflaatio ja globaalit epävarmuudet vaikuttavat talouden näkymiin.</p>
+<h2>Kuluttajat varovaisia</h2>
+<p>Monet kotitaloudet ovat vähentäneet kulutustaan.</p>
+<blockquote>"Kuluttajien luottamus on historiallisen alhaisella tasolla", sanoo ekonomisti Anna Korhonen.</blockquote>
+```
+Output:
+```
+<title>Suomen talouskasvu hidastuu tänä vuonna</title>
 
-## example 2: custom markers, need to convert to standard tags.   
+<lead>Asiantuntijoiden mukaan inflaatio ja globaalit epävarmuudet vaikuttavat talouden näkymiin.</lead>
 
-title: Espoossa saa kesällä puistoruokaa 16 vuoden tauon jälkeen
+<subtitle>Kuluttajat varovaisia</subtitle>
 
-ingress: Lapset saavat syödä ilmaisen lounaan tänä kesänä viidessä espoolaisessa leikkipuistossa. Kyseessä on kokeilu.
+Monet kotitaloudet ovat vähentäneet kulutustaan.
 
-Lapset saavat tänä kesänä ilmaista ruokaa myös Espoon leikkipuistoissa. Ruokaa saa heinäkuussa Soukan, Perkkaan, Olarin, Suvelan ja Tapiolan asukaspuistoissa.
+<quote>"Kuluttajien luottamus on historiallisen alhaisella tasolla", sanoo ekonomisti Anna Korhonen.</quote>
+```
 
-Ruokailuun ei tarvitse ilmoittautua. Mukaan täytyy ottaa kotoa lautanen, lusikka, haarukka ja muki. Kaikille on tarjolla sama ruoka. Kahtena tai kolmena päivänä viikossa se on kasvisruoka.
+**Example 3: Short article without clear sections**
 
-Espoossa järjestettiin puistoruokailu viimeksi 16 vuotta sitten. Sen jälkeen kaupunki halusi säästää. Puistojen ruokailuissa syntyi hävikkiä: 16 prosenttia ruoasta meni roskikseen. Tätä pidettiin ongelmana.
+Input:
+```
+Porvoon vanha silta suljetaan huoltotöiden ajaksi
 
-subtitle: Puistoruokailuista kerätään tänä vuonna tietoa
+Sillan korjaustyöt alkavat maanantaina ja kestävät viikon. Kaupunki suosittelee käyttämään vaihtoehtoisia reittejä.
+```
+Output:
+```
+<title>Porvoon vanha silta suljetaan huoltotöiden ajaksi</title>
 
-Tälle vuodelle Espoon kaupunginvaltuusto varasi lähes 150 000 euroa puistoruokailuihin.
+Sillan korjaustyöt alkavat maanantaina ja kestävät viikon. Kaupunki suosittelee käyttämään vaihtoehtoisia reittejä.
+```
 
-"Keräämme tietoa siitä, miten ruokailu järjestetään ja paljonko se maksaa, kertoo aluepäällikkö Nina Konttinen."
+### Most Important Rules (Repeated):
+- Only use the four standard tags: `<title>`, `<lead>`, `<subtitle>`, `<quote>`. Remove any other tags or formatting.
+- Always include exactly one `<title>` tag.
+- Do NOT include `<lead>`, `<subtitle>`, or `<quote>` unless clearly justified by the content.
+- If input is already correctly tagged using ONLY the four custom tags, pass it through unchanged.
+- Do NOT make any changes to the original wording, facts, tone, or style of the article. Preserve journalistic integrity.
 
-Hän vastaa Espoossa asukaspuistoista.
-
-Kokeilun jälkeen päätetään, jatketaanko puistoruokailua Espoossa seuraavina kesinä.
-
-## example 3: custom HTML tags which need to be converted into our 4 standard tags.
-
-<h1>Espoossa saa kesällä puistoruokaa 16 vuoden tauon jälkeen</h1>
-
-<h2>Lapset saavat syödä ilmaisen lounaan tänä kesänä viidessä espoolaisessa leikkipuistossa. Kyseessä on kokeilu.</h2>
-
-Lapset saavat tänä kesänä ilmaista ruokaa myös Espoon leikkipuistoissa. Ruokaa saa heinäkuussa Soukan, Perkkaan, Olarin, Suvelan ja Tapiolan asukaspuistoissa.
-
-Ruokailuun ei tarvitse ilmoittautua. Mukaan täytyy ottaa kotoa lautanen, lusikka, haarukka ja muki. Kaikille on tarjolla sama ruoka. Kahtena tai kolmena päivänä viikossa se on kasvisruoka.
-
-Espoossa järjestettiin puistoruokailu viimeksi 16 vuotta sitten. Sen jälkeen kaupunki halusi säästää. Puistojen ruokailuissa syntyi hävikkiä: 16 prosenttia ruoasta meni roskikseen. Tätä pidettiin ongelmana.
-
-<h3>Puistoruokailuista kerätään tänä vuonna tietoa</h3>
-
-Tälle vuodelle Espoon kaupunginvaltuusto varasi lähes 150 000 euroa puistoruokailuihin.
-
-<blockquote>Keräämme tietoa siitä, miten ruokailu järjestetään ja paljonko se maksaa, kertoo aluepäällikkö Nina Konttinen.</blockquote>
-
-Hän vastaa Espoossa asukaspuistoista.
-
-Kokeilun jälkeen päätetään, jatketaanko puistoruokailua Espoossa seuraavina kesinä.
-
-## output: Proper parsed output for all inputs shown in examples 1-3.
-
-<title>Espoossa saa kesällä puistoruokaa 16 vuoden tauon jälkeen</title>
-
-<lead>Lapset saavat syödä ilmaisen lounaan tänä kesänä viidessä espoolaisessa leikkipuistossa. Kyseessä on kokeilu.</lead>
-
-Lapset saavat tänä kesänä ilmaista ruokaa myös Espoon leikkipuistoissa. Ruokaa saa heinäkuussa Soukan, Perkkaan, Olarin, Suvelan ja Tapiolan asukaspuistoissa.
-
-Ruokailuun ei tarvitse ilmoittautua. Mukaan täytyy ottaa kotoa lautanen, lusikka, haarukka ja muki. Kaikille on tarjolla sama ruoka. Kahtena tai kolmena päivänä viikossa se on kasvisruoka.
-
-Espoossa järjestettiin puistoruokailu viimeksi 16 vuotta sitten. Sen jälkeen kaupunki halusi säästää. Puistojen ruokailuissa syntyi hävikkiä: 16 prosenttia ruoasta meni roskikseen. Tätä pidettiin ongelmana.
-
-<subtitle>Puistoruokailuista kerätään tänä vuonna tietoa</subtitle>
-
-Tälle vuodelle Espoon kaupunginvaltuusto varasi lähes 150 000 euroa puistoruokailuihin.
-
-<quote>Keräämme tietoa siitä, miten ruokailu järjestetään ja paljonko se maksaa, kertoo aluepäällikkö Nina Konttinen.</quote>
-
-Hän vastaa Espoossa asukaspuistoista.
-
-Kokeilun jälkeen päätetään, jatketaanko puistoruokailua Espoossa seuraavina kesinä. 
-
-# TASK
-
-You need to verify that text contains tags or add them if not. If the text is already properly tagged, containing <title>, <lead>, <subtitle> or <quote> tags, you simply verify that all tags are complete, but do not add any new tags. 
-If text has not tags or they are non-standard tags, you need to add standard tags yourself. When adding new tags, you need to carefully consider where to add tags. Apart from title, other tags might or might not be needed.
-
-Instructions:
-- input text could in various forms, your need to analyze the content and adapt to any input formats.
-- When tagging text, do not add more tags than absolutely necessary; less is better.
-- Output text must be ALWAYS clean, parsed text with standard tags that can ONLY contain tags <title>, <lead>, <subtitle> and <quote>, nothing else.
-- if the input text is already tagged correctly, do not make any changes and simply pass the existing text as it is.
-
-Important: You may NEVER change content of the article text in any way except fix and/or add given standard tags. Journalistic content and language of the article must remain exactly as it was.
-
-# Output
-
-Tagged version of the input text. Do NOT include any other outputs, such as explanations or comments.
-
-tagged text:
+### Output Format:
+Return the tagged text clearly formatted with ONLY the allowed custom tags and regular article text. Do NOT include explanations or additional comments.
 '''
 
 def markdown_to_pdf(md_text):
@@ -595,12 +574,11 @@ def filereader(filename):
         raise Exception(f"Error reading file {filename}: {str(e)}")
 
 def tagged_text_to_noncolored_html(tagged_text):
-    # Instead of colors, we'll map tags to their respective HTML transformations
     tag_transform_map = {
-        'title': lambda lines: '\n'.join(f'<h1>{line.strip()}</h1>' for line in lines if line.strip()),
-        'lead': lambda lines: '\n'.join(f'<h3>{line.strip()}</h3>' for line in lines if line.strip()),
-        'subtitle': lambda lines: '\n'.join(f'<h4>{line.strip()}</h4>' for line in lines if line.strip()),
-        'quote': lambda lines: '\n'.join(f'<p><i>«{line.strip()}»</i></p>' for line in lines if line.strip()),
+        'title': lambda text: f'<h1>{text.strip()}</h1>',
+        'lead': lambda text: f'<h3>{text.strip()}</h3>',
+        'subtitle': lambda text: f'<h4>{text.strip()}</h4>',
+        'quote': lambda text: f'<p><i>«{text.strip()}»</i></p>',
     }
 
     def process_element_children(element):
@@ -608,62 +586,38 @@ def tagged_text_to_noncolored_html(tagged_text):
         for child in element.contents:
             result = process_element(child)
             if result.strip():
-                # Split content into lines
-                lines = result.split('\n')
-                # Wrap each line with <p></p>, except we'll do this only for non-transformed text
-                wrapped_lines = [f'<p>{line.strip()}</p>' for line in lines if line.strip()]
-                content += '\n'.join(wrapped_lines)
+                # Only wrap if it's not a block-level element
+                if re.match(r'^<\s*(h1|h3|h4|p|blockquote|ul|ol|div|section)\b', result.strip()):
+                    content += result.strip() + '\n'
+                else:
+                    content += f'<p>{result.strip()}</p>\n'
         return content
 
     def process_element(element):
         if isinstance(element, NavigableString):
-            # Escape HTML special characters in text nodes
-            text = escape(str(element))
-            return text
+            return escape(str(element))
         elif isinstance(element, Tag):
             tag_name = element.name
-            # Process child elements
-            content = ''.join([process_element(child) for child in element.contents])
-            lines = content.split('\n')
-
+            text = ''.join([process_element(child) for child in element.contents])
             if tag_name in tag_transform_map:
-                # Apply transformation for defined tags
-                transformed_content = tag_transform_map[tag_name](lines)
-                return transformed_content
+                return tag_transform_map[tag_name](text)
             else:
-                # For other tags or content, process recursively
                 return process_element_children(element)
         else:
             return ''
 
-    # Parse the entire tagged_text
     soup = BeautifulSoup(tagged_text, 'html.parser')
-
-    # Process the entire content
     html_text = process_element(soup)
 
-    # Build final HTML (no color coding needed anymore)
     html_output = f'''<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <style>
-        border: 1px solid #4CAF50;
-        p {{
-            margin-bottom: 1em;
-            font-family: Arial, sans-serif;
-        }}
-        .news-url {{
-        font-size: 18px;
-        margin-bottom: 10px;
-        }}
-    </style>
 </head>
 <body>
 {html_text}
 </body>
 </html>'''
-
     return html_output
 
 class FactCheckedText(BaseModel):
@@ -729,14 +683,13 @@ def simplify_text(parsed_text: str,session_state) -> str:
         PROMPT = PROMPT_error_correct
         PROMPT = PROMPT.replace('{new_text}',response).replace('{old_text}',parsed_text)
         resp = get_llm_response(system=None,input=PROMPT,model=FACTCORRECT_model,temperature=0,responseformat=FactCheckedText)
+
         response = resp.model_dump()
         if response['critical_errors_found']:
-            print(f'fact-checker identified following {len(response["list_of_critical_errors"])} critical errors:')
+            print(f'fact-checker identified and corrected the following {len(response["list_of_critical_errors"])} critical errors:')
             for error in response['list_of_critical_errors']:
-                print(f'...{error}\n')
+                print(f'...{error}')
         response = clean_generated_text(response['new_text'])
         response = response.replace('<tarkastettava_teksti_B>','').replace('</tarkastettava_teksti_B>','').strip()
 
     return response
-
-
