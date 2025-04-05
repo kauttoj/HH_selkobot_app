@@ -1,9 +1,6 @@
 import os
-import io
 import re
-import markdown2
 import tiktoken
-from xhtml2pdf import pisa
 from dotenv import load_dotenv
 import openai
 from bs4 import BeautifulSoup, NavigableString, Tag
@@ -17,6 +14,11 @@ import anthropic
 load_dotenv('.env')
 os.environ["ANTHROPIC_API_KEY"] = os.getenv("ANTHROPIC_API_KEY")
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+
+if os.environ["ANTHROPIC_API_KEY"] is None or len(os.environ["ANTHROPIC_API_KEY"])<10:
+    print('Anthropic API does not appear valid!')
+if os.environ["OPENAI_API_KEY"] is None or len(os.environ["OPENAI_API_KEY"]) < 10:
+    print('OpenAI API does not appear valid!')
 
 client_openai = openai.OpenAI()
 client_anthropic = anthropic.Anthropic()
@@ -384,35 +386,6 @@ Sillan korjaustyöt alkavat maanantaina ja kestävät viikon. Kaupunki suosittel
 ### Output Format:
 Return the tagged text clearly formatted with ONLY the allowed custom tags and regular article text. Do NOT include explanations or additional comments.
 '''
-
-def markdown_to_pdf(md_text):
-    """Converts Markdown text to PDF binary data."""
-    html_text = markdown2.markdown(md_text)
-    full_html = f"""
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <style>
-        body {{
-          font-family: 'DejaVuSans', Arial, sans-serif;
-          font-size: 12pt;
-          line-height: 1.6;
-        }}
-        h1 {{ color: darkblue; text-align: center; }}
-        h2 {{ color: darkred; }}
-        ul {{ margin-left: 20px; }}
-        a {{ color: darkgreen; text-decoration: none; }}
-      </style>
-    </head>
-    <body>{html_text}</body>
-    </html>
-    """
-    pdf_buffer = io.BytesIO()
-    pisa_status = pisa.CreatePDF(io.StringIO(full_html), dest=pdf_buffer)
-    if pisa_status.err:
-        raise Exception("Error in PDF generation")
-    pdf_buffer.seek(0)
-    return pdf_buffer.getvalue()
 
 def get_llm_response(system=None, input=None, model=None, temperature=None, responseformat=None):
     """Calls the LLM API using the provided prompt and configuration."""
